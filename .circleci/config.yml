@@ -368,10 +368,21 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      # - run:
-      #     name: Install dependencies
-      #     command: |
-      #       # your code here
+      - run:
+          name: Install tar utility
+          command: |
+            yum install -y tar gzip
+      - run:
+          name: Get Old Workflow ID 
+          command: |
+            aws cloudformation \
+                    list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                    --no-paginate --output text >> OLD_CIRCLE_WORKFLOW_ID.txt
+            cat OLD_CIRCLE_WORKFLOW_ID.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/OLD_CIRCLE_WORKFLOW_ID.txt
       - run:
           name: Update cloudfront distribution
           command: |
@@ -391,13 +402,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Get old stack workflow id
+          name: Install tar utility
           command: |
-            export OldWorkflowID=$(aws cloudformation \
-              list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-              --no-paginate --output text)
-            echo OldWorkflowID: "${OldWorkflowID}"
-            echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
+            yum install -y tar gzip
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Get Old Workflow ID and all stack names
+          command: |
+            cat OLD_CIRCLE_WORKFLOW_ID.txt
+            export OldWorkflowID=$(tail -1 OLD_CIRCLE_WORKFLOW_ID.txt)
+            echo $OldWorkflowID
             # Fetch the stack names          
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
@@ -405,14 +420,9 @@ jobs:
       - run:
           name: Remove old stacks and files
           command: |
-            export OldWorkflowID=$(aws cloudformation \
-              list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-              --no-paginate --output text)
-              
-            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
-              --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
+            export OldWorkflowID=$(tail -1 old_id.txt)
 
-            if [[ "udapeople-${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
+            if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"

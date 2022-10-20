@@ -420,7 +420,7 @@ jobs:
       - run:
           name: Remove old stacks and files
           command: |
-            export OldWorkflowID=$(tail -1 old_id.txt)
+            export OldWorkflowID=$(tail -1 OLD_CIRCLE_WORKFLOW_ID.txt)
 
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then

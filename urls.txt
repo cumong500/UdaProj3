@@ -1,5 +1,5 @@
 1. Public GitHub repository: https://github.com/cumong500/UdaProj3
-2. Frontend public URL: http://udapeople-eff0875.s3-website-us-east-1.amazonaws.com/
-3. CloudFront URL: http://d26ndk5dgs9tem.cloudfront.net/
-4. Backend health check URL: http://18.233.102.205:3030/api/status
+2. Frontend public URL: http://udapeople-f7e2ba6.s3-website-us-east-1.amazonaws.com/
+3. CloudFront URL: http://d19rxev60m0uz0.cloudfront.net
+4. Backend health check URL: http://44.202.249.50:3030/api/status
 5. Prometheus Server URL: http://ec2-44-210-114-239.compute-1.amazonaws.com:9090/
